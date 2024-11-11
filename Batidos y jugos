@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batidos y Jugos Personalizados</title>
+    <style>
+        /* El estilo sigue igual */
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #ffe6e6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #ff4d4d;
+        }
+        .option {
+            background: #ffcccc;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .option input[type="checkbox"] {
+            transform: scale(1.2);
+        }
+        .order-button {
+            background: #ff4d4d;
+            color: #fff;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .order-button:hover {
+            background: #ff6666;
+        }
+        .order-summary {
+            background: #fff5f5;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+        .order-summary h2 {
+            color: #ff4d4d;
+            text-align: center;
+            font-size: 22px;
+        }
+        .custom-text {
+            display: none;
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ffcccc;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Personaliza tu Batido o Jugo</h1>
+        
+        <!-- Sección de ingredientes -->
+        <div class="option">
+            <label for="banana">Banana</label>
+            <input type="checkbox" id="banana">
+        </div>
+        <div class="option">
+            <label for="fresa">Fresa</label>
+            <input type="checkbox" id="fresa">
+        </div>
+        <div class="option">
+            <label for="mango">Mango</label>
+            <input type="checkbox" id="mango">
+        </div>
+        <div class="option">
+            <label for="espinaca">Espinaca</label>
+            <input type="checkbox" id="espinaca">
+        </div>
+        <div class="option">
+            <label for="almendras">Leche de almendras</label>
+            <input type="checkbox" id="almendras">
+        </div>
+        <div class="option">
+            <label for="otros">Otros</label>
+            <input type="checkbox" id="otros" onclick="toggleCustomInput()">
+        </div>
+        
+        <!-- Caja de texto personalizada para "Otros" -->
+        <textarea id="customText" class="custom-text" placeholder="Escribe aquí tu personalización..."></textarea>
+        
+        <!-- Botón de pedido -->
+        <button class="order-button" onclick="makeOrder()">Hacer Pedido</button>
+        
+        <!-- Resumen del pedido -->
+        <div class="order-summary" id="order-summary">
+            <h2>Resumen de tu Pedido</h2>
+            <p id="order-details"></p>
+            <button class="order-button" onclick="submitOrder()">Listo</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleCustomInput() {
+            const customText = document.getElementById("customText");
+            const otrosCheckbox = document.getElementById("otros");
+            customText.style.display = otrosCheckbox.checked ? "block" : "none";
+        }
+
+        function makeOrder() {
+            let orderDetails = [];
+            const ingredients = [
+                {id: "banana", name: "Banana"},
+                {id: "fresa", name: "Fresa"},
+                {id: "mango", name: "Mango"},
+                {id: "espinaca", name: "Espinaca"},
+                {id: "almendras", name: "Leche de almendras"},
+            ];
+            
+            ingredients.forEach(ingredient => {
+                if (document.getElementById(ingredient.id).checked) {
+                    orderDetails.push(ingredient.name);
+                }
+            });
+            
+            const otrosCheckbox = document.getElementById("otros");
+            const customText = document.getElementById("customText");
+            if (otrosCheckbox.checked && customText.value.trim() !== "") {
+                orderDetails.push("Otros: " + customText.value.trim());
+            } else if (otrosCheckbox.checked) {
+                orderDetails.push("Otros (sin detalles)");
+            }
+            
+            document.getElementById("order-details").innerText = orderDetails.length > 0 ? 
+                orderDetails.join(", ") : "No seleccionaste ningún ingrediente.";
+                
+            document.getElementById("order-summary").style.display = "block";
+        }
+
+        function submitOrder() {
+            const orderDetails = document.getElementById("order-details").innerText;
+            
+            if (orderDetails !== "No seleccionaste ningún ingrediente.") {
+                fetch('sendOrder.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ order: orderDetails })
+                })
+                .then(response => response.json())
+                .then(data => alert(data.message))
+                .catch(error => alert("Error al enviar el pedido: " + error));
+            }
+        }
+    </script>
+</body>
+</html>
